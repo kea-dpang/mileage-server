@@ -7,11 +7,6 @@ import java.time.LocalDateTime
 @Table(name = "charge_request")
 data class ChargeRequest(
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "charge_request_id")
-    var chargeRequestId: Long,
-
     @Column(name = "user_id")
     var userId: Long,
 
@@ -26,5 +21,10 @@ data class ChargeRequest(
     var depositorName: String,
 
     @Column(name = "requested_mileage")
-    var requestedMileage: Int
+    var requestedMileage: Int,
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "charge_request_id")
+    var chargeRequestId: Long? = null
 )

@@ -6,4 +6,4 @@ package kea.dpang.mileage.dto
  * @property requestId 마일리지 충전 요청의 ID.
  * @property approve 충전 승인 여부.
  */
-data class MileageRechargeApprovalDTO(val requestId: String, val approve: Boolean)
+data class MileageRechargeApprovalDTO(val requestId: Long, val approve: Boolean)

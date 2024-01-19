@@ -2,7 +2,9 @@ package kea.dpang.mileage.service
 
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequest
+import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.entity.Mileage
+import java.time.LocalDateTime
 
 /**
  * 마일리지 서비스 인터페이스.
@@ -55,20 +57,40 @@ interface MileageService {
     fun requestMileageRecharge(request: MileageRechargeRequestDTO): ChargeRequest
 
     /**
+     * 마일리지 충전 요청을 조회합니다.
+     *
+     * @param userId 사용자 ID.
+     * @param status 마일리지 충전 요청 상태
+     * @param startDate 조회할 날짜 범위의 시작일.
+     * @param endDate 조회할 날짜 범위의 종료일.
+     * @param depositorName 입금자 이름.
+     * @param sortOption 정렬 옵션. 기본값은 최신 순.
+     * @return 조회 조건에 일치하는 충전 요청 정보들을 담은 리스트.
+     */
+    fun getChargeRequests(
+        userId: Long?,
+        status: ChargeRequestStatus?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        depositorName: String?,
+        sortOption: SortOption = SortOption.RECENT
+    ): List<ChargeRequest>
+
+    /**
      * 마일리지 충전 요청을 처리합니다.
      *
      * @param request 마일리지 충전 요청 처리 정보를 담은 DTO.
-     * @return 충전  정보를 담은 엔티티.
+     * @return 충전 정보를 담은 엔티티.
      */
     fun processMileageRechargeRequest(request: MileageRechargeApprovalDTO): ChargeRequest
 
     /**
      * 모든 회원을 대상으로 연간 1일마다 100만 마일리지를 자동으로 충전합니다.
      */
-    fun autoChargeAnnualMileage()
+    fun chargeAnnualMileage()
 
     /**
      * 모든 회원을 대상으로 분기별 (1월, 4월, 7월, 10월)1일에 근속년수 기반으로 마일리지를 자동으로 충전합니다.
      */
-    fun autoChargeQuarterlyMileageBasedOnTenure()
+    fun chargeQuarterlyMileageBasedOnTenure()
 }
