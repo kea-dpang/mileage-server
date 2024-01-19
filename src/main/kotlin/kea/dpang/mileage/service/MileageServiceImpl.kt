@@ -114,7 +114,7 @@ class MileageServiceImpl(
         return chargeRequestRepository.save(chargeRequest)
     }
 
-    override fun getChargeRequests(
+    override fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
         startDate: LocalDateTime?,

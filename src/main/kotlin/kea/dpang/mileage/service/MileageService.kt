@@ -67,7 +67,7 @@ interface MileageService {
      * @param sortOption 정렬 옵션. 기본값은 최신 순.
      * @return 조회 조건에 일치하는 충전 요청 정보들을 담은 리스트.
      */
-    fun getChargeRequests(
+    fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
         startDate: LocalDateTime?,
