@@ -197,9 +197,9 @@ class MileageServiceImpl(
         // 모든 유저의 마일리지 정보를 가져온다.
         val userMileageList = mileageRepository.findAll()
 
-        // 각 유저의 마일리지를 100만 증가시킨다.
+        // 각 유저의 마일리지를 100만 마일리지로 초기화 한다.
         userMileageList.forEach { mileage ->
-            mileage.mileage += 1_000_000
+            mileage.mileage = 1_000_000
             logger.info("사용자(${mileage.userId})에게 연간 마일리지 100만 충전 완료")
         }
     }
