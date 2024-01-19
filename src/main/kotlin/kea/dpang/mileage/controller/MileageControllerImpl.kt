@@ -9,6 +9,7 @@ import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.service.MileageService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
@@ -19,7 +20,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping
     @Operation(summary = "마일리지 생성", description = "마일리지를 생성합니다. 이 API는 회원 가입 시 호출됩니다.")
-    override fun createMileage(userId: Long): ResponseEntity<SuccessResponse<MileageDTO>> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    override fun createMileage(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        userId: Long
+    ): ResponseEntity<SuccessResponse<MileageDTO>> {
+
         val mileage = mileageService.createMileage(userId)
         val successResponse = SuccessResponse(201, "마일리지가 생성되었습니다.", MileageDTO.fromEntity(mileage))
         return ResponseEntity(successResponse, HttpStatus.CREATED)
@@ -27,7 +33,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @GetMapping("/{userId}")
     @Operation(summary = "마일리지 조회", description = "사용자의 마일리지를 조회합니다.")
-    override fun getMileage(@PathVariable userId: Long): ResponseEntity<SuccessResponse<MileageDTO>> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    override fun getMileage(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @PathVariable userId: Long
+    ): ResponseEntity<SuccessResponse<MileageDTO>> {
+
         val mileage = mileageService.getMileage(userId)
         val successResponse = SuccessResponse(200, "마일리지 조회에 성공하였습니다.", MileageDTO.fromEntity(mileage))
         return ResponseEntity(successResponse, HttpStatus.OK)
@@ -35,7 +46,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @DeleteMapping("/{userId}")
     @Operation(summary = "마일리지 삭제", description = "사용자의 마일리지를 삭제합니다. 이 API는 회원 탈퇴 시 호출됩니다.")
-    override fun deleteMileage(@PathVariable userId: Long): ResponseEntity<BaseResponse> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    override fun deleteMileage(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @PathVariable userId: Long
+    ): ResponseEntity<BaseResponse> {
+
         mileageService.deleteMileage(userId)
         val response = BaseResponse(204, "마일리지가 삭제되었습니다.")
         return ResponseEntity(response, HttpStatus.NO_CONTENT)
@@ -43,7 +59,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/consume")
     @Operation(summary = "마일리지 사용", description = "마일리지를 사용합니다.")
-    override fun consumeMileage(@RequestBody request: ConsumeMileageRequestDTO): ResponseEntity<BaseResponse> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #request.userId)")
+    override fun consumeMileage(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @RequestBody request: ConsumeMileageRequestDTO
+    ): ResponseEntity<BaseResponse> {
+
         mileageService.consumeMileage(request)
         val response = BaseResponse(200, "마일리지 사용에 성공하였습니다.")
         return ResponseEntity(response, HttpStatus.OK)
@@ -51,7 +72,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/refund")
     @Operation(summary = "마일리지 환불", description = "마일리지를 환불합니다.")
-    override fun refundMileage(@RequestBody request: RefundRequestDTO): ResponseEntity<BaseResponse> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #request.userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
+    override fun refundMileage(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @RequestBody request: RefundRequestDTO
+    ): ResponseEntity<BaseResponse> {
+
         mileageService.refundMileage(request)
         val response = BaseResponse(200, "마일리지 환불에 성공하였습니다.")
         return ResponseEntity(response, HttpStatus.OK)
@@ -59,7 +85,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/recharge-request")
     @Operation(summary = "마일리지 충전 요청", description = "마일리지 충전을 요청합니다.")
-    override fun requestMileageRecharge(@RequestBody request: MileageRechargeRequestDTO): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
+    @PreAuthorize("(hasRole('USER') and #clientId == #request.userId)")
+    override fun requestMileageRecharge(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @RequestBody request: MileageRechargeRequestDTO
+    ): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
+
         val chargeRequest = mileageService.requestMileageRecharge(request)
         val successResponse =
             SuccessResponse(201, "마일리지 충전 요청이 성공적으로 제출되었습니다.", ChargeRequestDTO.fromEntity(chargeRequest))
@@ -68,7 +99,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @GetMapping("/recharge-requests")
     @Operation(summary = "마일리지 충전 요청 목록 조회", description = "마일리지 충전 요청 목록을 조회합니다.")
+    @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun getRechargeMileageRequests(
+        @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
         @RequestParam(required = false) userId: Long?,
         @RequestParam(required = false) status: ChargeRequestStatus?,
         @RequestParam(required = false) startDate: LocalDateTime?,
@@ -86,6 +119,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/recharge-requests/{id}/process")
     @Operation(summary = "마일리지 충전 요청 처리", description = "마일리지 충전 요청을 처리합니다.")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun processMileageRechargeRequest(
         @PathVariable id: Long,
         @RequestBody request: MileageRechargeApprovalDTO
@@ -98,6 +132,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/annual-mileage-charge")
     @Operation(summary = "연간 마일리지 충전", description = "연간 마일리지를 충전합니다.")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun chargeAnnualMileage(): ResponseEntity<BaseResponse> {
         mileageService.chargeAnnualMileage()
         val response = BaseResponse(200, "연간 마일리지 충전이 성공적으로 처리되었습니다.")
@@ -106,6 +141,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
 
     @PostMapping("/quarterly-mileage-charge")
     @Operation(summary = "분기별 근속년수에 따른 마일리지 충전", description = "분기별 근속년수에 따른 마일리지를 충전합니다.")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun chargeQuarterlyMileageBasedOnTenure(): ResponseEntity<BaseResponse> {
         mileageService.chargeQuarterlyMileageBasedOnTenure()
         val response = BaseResponse(200, "분기별 근속년수 기반 마일리지 충전이 성공적으로 처리되었습니다.")

@@ -5,7 +5,6 @@ import kea.dpang.mileage.base.SuccessResponse
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequestStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDateTime
 
 /**
@@ -17,55 +16,65 @@ interface MileageController {
      * 마일리지 생성 요청을 처리합니다.
      * 해당 요청은 회원가입 과정에서만 사용됩니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param userId 마일리지를 생성할 사용자의 ID.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun createMileage(userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
+    fun createMileage(clientId: Long, userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
 
     /**
      * 사용자의 마일리지를 조회합니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param userId 마일리지를 조회할 사용자의 ID.
      * @return 조회 결과를 포함하는 Response 객체.
      */
-    fun getMileage(userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
+    fun getMileage(clientId: Long, userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
 
     /**
      * 마일리지를 삭제하는 요청을 처리합니다.
      * 해당 요청은 사용자를 탈퇴하는 과정에서만 사용됩니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param userId 마일리지를 삭제할 사용자의 ID.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun deleteMileage(userId: Long): ResponseEntity<BaseResponse>
+    fun deleteMileage(clientId: Long, userId: Long): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 소비 요청을 처리합니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param request 마일리지 소비 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun consumeMileage(request: ConsumeMileageRequestDTO): ResponseEntity<BaseResponse>
+    fun consumeMileage(clientId: Long, request: ConsumeMileageRequestDTO): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 환불 요청을 처리합니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param request 마일리지 환불 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun refundMileage(request: RefundRequestDTO): ResponseEntity<BaseResponse>
+    fun refundMileage(clientId: Long, request: RefundRequestDTO): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 충전을 요청합니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param request 마일리지 충전 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun requestMileageRecharge(request: MileageRechargeRequestDTO): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
+    fun requestMileageRecharge(
+        clientId: Long,
+        request: MileageRechargeRequestDTO
+    ): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
 
     /**
      * 마일리지 충전 요청 정보를 조회합니다.
      *
+     * @param clientId 클라이언트 ID, 클라이언트의 식별자로서 API 요청에 포함된 'X-DPANG-CLIENT-ID' 헤더 값
      * @param userId 사용자 아이디
      * @param status 충전 요청 상태
      * @param startDate 시작 날짜
@@ -75,12 +84,13 @@ interface MileageController {
      * @return 조회된 충전 요청 목록을 포함하는 응답
      */
     fun getRechargeMileageRequests(
-        @RequestParam(required = false) userId: Long?,
-        @RequestParam(required = false) status: ChargeRequestStatus?,
-        @RequestParam(required = false) startDate: LocalDateTime?,
-        @RequestParam(required = false) endDate: LocalDateTime?,
-        @RequestParam(required = false) depositorName: String?,
-        @RequestParam(defaultValue = "RECENT") sortOption: SortOption
+        clientId: Long,
+        userId: Long?,
+        status: ChargeRequestStatus?,
+        startDate: LocalDateTime?,
+        endDate: LocalDateTime?,
+        depositorName: String?,
+        sortOption: SortOption
     ): ResponseEntity<SuccessResponse<List<ChargeRequestDTO>>>
 
     /**
