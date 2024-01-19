@@ -4,6 +4,7 @@ import kea.dpang.mileage.base.BaseResponse
 import kea.dpang.mileage.base.SuccessResponse
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequestStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.RequestParam
 import java.time.LocalDateTime
 
@@ -19,7 +20,7 @@ interface MileageController {
      * @param userId 마일리지를 생성할 사용자의 ID.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun createMileage(userId: Long): SuccessResponse<MileageDTO>
+    fun createMileage(userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
 
     /**
      * 사용자의 마일리지를 조회합니다.
@@ -27,7 +28,7 @@ interface MileageController {
      * @param userId 마일리지를 조회할 사용자의 ID.
      * @return 조회 결과를 포함하는 Response 객체.
      */
-    fun getMileage(userId: Long): SuccessResponse<MileageDTO>
+    fun getMileage(userId: Long): ResponseEntity<SuccessResponse<MileageDTO>>
 
     /**
      * 마일리지를 삭제하는 요청을 처리합니다.
@@ -36,7 +37,7 @@ interface MileageController {
      * @param userId 마일리지를 삭제할 사용자의 ID.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun deleteMileage(userId: Long): BaseResponse
+    fun deleteMileage(userId: Long): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 소비 요청을 처리합니다.
@@ -44,7 +45,7 @@ interface MileageController {
      * @param request 마일리지 소비 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun consumeMileage(request: ConsumeMileageRequestDTO): BaseResponse
+    fun consumeMileage(request: ConsumeMileageRequestDTO): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 환불 요청을 처리합니다.
@@ -52,7 +53,7 @@ interface MileageController {
      * @param request 마일리지 환불 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun refundMileage(request: RefundRequestDTO): BaseResponse
+    fun refundMileage(request: RefundRequestDTO): ResponseEntity<BaseResponse>
 
     /**
      * 마일리지 충전을 요청합니다.
@@ -60,7 +61,7 @@ interface MileageController {
      * @param request 마일리지 충전 요청 정보를 담은 DTO.
      * @return 처리 결과를 포함하는 Response 객체.
      */
-    fun requestMileageRecharge(request: MileageRechargeRequestDTO): SuccessResponse<ChargeRequestDTO>
+    fun requestMileageRecharge(request: MileageRechargeRequestDTO): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
 
     /**
      * 마일리지 충전 요청 정보를 조회합니다.
@@ -80,7 +81,7 @@ interface MileageController {
         @RequestParam(required = false) endDate: LocalDateTime?,
         @RequestParam(required = false) depositorName: String?,
         @RequestParam(defaultValue = "RECENT") sortOption: SortOption
-    ): SuccessResponse<List<ChargeRequestDTO>>
+    ): ResponseEntity<SuccessResponse<List<ChargeRequestDTO>>>
 
     /**
      * 마일리지 충전 요청을 처리합니다.
@@ -89,20 +90,23 @@ interface MileageController {
      * @param request 마일리지 충전 요청의 승인 정보를 담은 DTO.
      * @return 처리된 마일리지 충전 요청 정보.
      */
-    fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): SuccessResponse<ChargeRequestDTO>
+    fun processMileageRechargeRequest(
+        id: Long,
+        request: MileageRechargeApprovalDTO
+    ): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
 
     /**
      * 연간 1일마다 모든 회원에게 100만 마일리지를 자동으로 충전합니다.
      *
      * @return 마일리지 충전 결과
      */
-    fun chargeAnnualMileage(): BaseResponse
+    fun chargeAnnualMileage(): ResponseEntity<BaseResponse>
 
     /**
      * 분기별 (1월, 4월, 7월, 10월) 1일에 모든 회원에게 근속년수 기반으로 마일리지를 자동으로 충전합니다.
      *
      * @return 마일리지 충전 결과
      */
-    fun chargeQuarterlyMileageBasedOnTenure(): BaseResponse
+    fun chargeQuarterlyMileageBasedOnTenure(): ResponseEntity<BaseResponse>
 
 }
