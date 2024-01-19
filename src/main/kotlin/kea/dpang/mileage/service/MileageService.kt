@@ -79,10 +79,11 @@ interface MileageService {
     /**
      * 마일리지 충전 요청을 처리합니다.
      *
+     * @param id 처리할 마일리지 충전 요청의 ID.
      * @param request 마일리지 충전 요청 처리 정보를 담은 DTO.
-     * @return 충전 정보를 담은 엔티티.
+     * @return 처리된 마일리지 충전 요청 정보를 포함하는 DTO.
      */
-    fun processMileageRechargeRequest(request: MileageRechargeApprovalDTO): ChargeRequest
+    fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): ChargeRequest
 
     /**
      * 모든 회원을 대상으로 연간 1일마다 100만 마일리지를 자동으로 충전합니다.

@@ -3,8 +3,11 @@ package kea.dpang.mileage.service
 import com.querydsl.core.BooleanBuilder
 import jakarta.transaction.Transactional
 import kea.dpang.mileage.dto.*
+import kea.dpang.mileage.dto.SortOption.*
 import kea.dpang.mileage.entity.ChargeRequest
 import kea.dpang.mileage.entity.ChargeRequestStatus
+import kea.dpang.mileage.entity.ChargeRequestStatus.APPROVED
+import kea.dpang.mileage.entity.ChargeRequestStatus.REJECTED
 import kea.dpang.mileage.entity.Mileage
 import kea.dpang.mileage.entity.QChargeRequest
 import kea.dpang.mileage.exception.ChargeRequestNotFoundException
@@ -149,41 +152,42 @@ class MileageServiceImpl(
 
         // 정렬 옵션에 따라 결과를 정렬하여 반환한다.
         return when (sortOption) {
-            SortOption.RECENT -> {
+            RECENT -> {
                 chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.DESC, "requestDate")).toList()
             }
 
-            SortOption.OLDEST -> {
+            OLDEST -> {
                 chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.ASC, "requestDate")).toList()
             }
 
-            SortOption.MILEAGE_ASC -> {
+            MILEAGE_ASC -> {
                 chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.ASC, "requestedMileage")).toList()
             }
 
-            SortOption.MILEAGE_DESC -> {
+            MILEAGE_DESC -> {
                 chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.DESC, "requestedMileage")).toList()
             }
         }
     }
 
-    override fun processMileageRechargeRequest(request: MileageRechargeApprovalDTO): ChargeRequest {
+    override fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): ChargeRequest {
         // 충전 요청을 가져온다.
-        val chargeRequest = chargeRequestRepository.findById(request.requestId)
-            .orElseThrow { ChargeRequestNotFoundException(request.requestId) }
+        val chargeRequest = chargeRequestRepository.findById(id)
+            .orElseThrow { ChargeRequestNotFoundException(id) }
 
-        // 승인된 경우, 해당 사용자의 마일리지를 충전한다.
-        if (request.approve) {
+        // 승인 상태가 변경된 경우 처리한다.
+        if (request.approve != (chargeRequest.status == APPROVED)) {
             // 사용자 마일리지를 조회한다.
             val mileage = mileageRepository.findById(chargeRequest.userId)
                 .orElseThrow { UserMileageNotFoundException(chargeRequest.userId) }
 
-            // 사용자의 마일리지를 충전한다.
-            mileage.mileage += chargeRequest.requestedMileage
-        }
+            // 승인 상태에 따라 사용자의 마일리지를 충전하거나 차감한다.
+            val requestedMileage = chargeRequest.requestedMileage
+            mileage.mileage += if (request.approve) requestedMileage else -requestedMileage
 
-        // 충전 요청의 상태를 업데이트한다.
-        chargeRequest.status = if (request.approve) ChargeRequestStatus.APPROVED else ChargeRequestStatus.REJECTED
+            // 충전 요청의 상태를 업데이트한다.
+            chargeRequest.status = if (request.approve) APPROVED else REJECTED
+        }
 
         // 변경된 충전 요청을 반환한다.
         return chargeRequest
