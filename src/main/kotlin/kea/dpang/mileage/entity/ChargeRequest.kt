@@ -1,26 +1,33 @@
 package kea.dpang.mileage.entity
 
 import jakarta.persistence.*
+import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "charge_request")
 data class ChargeRequest(
 
-    @Column(name = "user_id")
+    @NotNull
+    @Column(name = "user_id", nullable = false)
     var userId: Long,
 
+    @NotNull
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     var status: ChargeRequestStatus,
 
-    @Column(name = "request_date")
+    @NotNull
+    @Column(name = "request_date", nullable = false)
     var requestDate: LocalDateTime,
 
-    @Column(name = "depositor_name")
+    @NotNull
+    @Column(name = "depositor_name", nullable = false)
     var depositorName: String,
 
-    @Column(name = "requested_mileage")
+    @Min(0)
+    @Column(name = "requested_mileage", nullable = false)
     var requestedMileage: Int,
 
     @Id
