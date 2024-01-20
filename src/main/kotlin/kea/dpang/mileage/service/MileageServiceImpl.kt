@@ -109,7 +109,11 @@ class MileageServiceImpl(
     }
 
     override fun requestMileageRecharge(request: MileageRechargeRequestDTO): ChargeRequest {
-        // 마일리지 충전 요청 객체를 생성합니다.
+        // 사용자 정보를 조회한다.
+        mileageRepository.findById(request.userId)
+            .orElseThrow { UserMileageNotFoundException(request.userId) }
+
+        // 마일리지 충전 요청 객체를 생성한다.
         val chargeRequest = ChargeRequest(
             userId = request.userId,
             requestedMileage = request.amount,
@@ -118,7 +122,7 @@ class MileageServiceImpl(
             status = ChargeRequestStatus.REQUESTED
         )
 
-        // 생성된 마일리지 충전 요청 객체를 저장하고 반환합니다.
+        // 생성된 마일리지 충전 요청 객체를 저장하고 반환한다.
         return chargeRequestRepository.save(chargeRequest)
     }
 
