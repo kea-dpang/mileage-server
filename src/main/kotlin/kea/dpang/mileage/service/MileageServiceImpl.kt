@@ -12,6 +12,7 @@ import kea.dpang.mileage.entity.Mileage
 import kea.dpang.mileage.entity.QChargeRequest
 import kea.dpang.mileage.exception.ChargeRequestNotFoundException
 import kea.dpang.mileage.exception.InsufficientMileageException
+import kea.dpang.mileage.exception.UserMileageAlreadyExistsException
 import kea.dpang.mileage.exception.UserMileageNotFoundException
 import kea.dpang.mileage.repository.ChargeRequestRepository
 import kea.dpang.mileage.repository.MileageRepository
@@ -35,6 +36,10 @@ class MileageServiceImpl(
     private val logger = LoggerFactory.getLogger(MileageServiceImpl::class.java)
 
     override fun createMileage(userId: Long): Mileage {
+        if (mileageRepository.existsById(userId)) {
+            throw UserMileageAlreadyExistsException(userId)
+        }
+
         val newMileage = Mileage(
             userId = userId,
             mileage = 0,
@@ -175,18 +180,42 @@ class MileageServiceImpl(
         val chargeRequest = chargeRequestRepository.findById(id)
             .orElseThrow { ChargeRequestNotFoundException(id) }
 
-        // 승인 상태가 변경된 경우 처리한다.
-        if (request.approve != (chargeRequest.status == APPROVED)) {
-            // 사용자 마일리지를 조회한다.
-            val mileage = mileageRepository.findById(chargeRequest.userId)
-                .orElseThrow { UserMileageNotFoundException(chargeRequest.userId) }
+        // 사용자 마일리지를 조회한다.
+        val mileage = mileageRepository.findById(chargeRequest.userId)
+            .orElseThrow { UserMileageNotFoundException(chargeRequest.userId) }
 
-            // 승인 상태에 따라 사용자의 마일리지를 충전하거나 차감한다.
-            val requestedMileage = chargeRequest.requestedMileage
-            mileage.mileage += if (request.approve) requestedMileage else -requestedMileage
+        // 요청된 마일리지를 가져옴
+        val requestedMileage = chargeRequest.requestedMileage
 
-            // 충전 요청의 상태를 업데이트한다.
-            chargeRequest.status = if (request.approve) APPROVED else REJECTED
+        // status에 따라 처리를 분기한다.
+        when (chargeRequest.status) {
+            ChargeRequestStatus.REQUESTED -> {
+                if (request.approve) {
+                    // 승인 요청인 경우 마일리지를 증가시키고 상태를 승인으로 변경
+                    mileage.personalChargedMileage += requestedMileage
+                    chargeRequest.status = APPROVED
+                }
+                // 요청이 거절인 경우 상태만 거절로 변경하고 마일리지는 변동이 없음
+                else chargeRequest.status = REJECTED
+            }
+
+            APPROVED -> {
+                if (!request.approve) {
+                    // 기존에 승인되었던 요청이 거절되는 경우 마일리지를 감소시키고 상태를 거절로 변경
+                    mileage.personalChargedMileage -= requestedMileage
+                    chargeRequest.status = REJECTED
+                }
+                // 승인 요청인 경우 상태와 마일리지는 변동 없음
+            }
+
+            REJECTED -> {
+                if (request.approve) {
+                    // 기존에 거절되었던 요청이 승인되는 경우 마일리지를 증가시키고 상태를 승인으로 변경
+                    mileage.personalChargedMileage += requestedMileage
+                    chargeRequest.status = APPROVED
+                }
+                // 거절 요청인 경우 상태와 마일리지는 변동 없음
+            }
         }
 
         // 변경된 충전 요청을 반환한다.
