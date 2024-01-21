@@ -106,14 +106,14 @@ interface MileageController {
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
 
     /**
-     * 연간 1일마다 모든 회원에게 100만 마일리지를 자동으로 충전합니다.
+     * 연간 1일마다 모든 회원에게 100만 마일리지를 충전합니다.
      *
      * @return 마일리지 충전 결과
      */
     fun chargeAnnualMileage(): ResponseEntity<BaseResponse>
 
     /**
-     * 분기별 (1월, 4월, 7월, 10월) 1일에 모든 회원에게 근속년수 기반으로 마일리지를 자동으로 충전합니다.
+     * 분기별 (1월, 4월, 7월, 10월) 1일에 모든 회원에게 근속년수 기반으로 마일리지를 충전합니다.
      *
      * @return 마일리지 충전 결과
      */
