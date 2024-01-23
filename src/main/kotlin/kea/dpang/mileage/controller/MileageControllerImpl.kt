@@ -8,6 +8,8 @@ import kea.dpang.mileage.base.SuccessResponse
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.service.MileageService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -127,10 +129,12 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         @Parameter(description = "입금자 이름")
         @RequestParam(required = false) depositorName: String?,
         @Parameter(description = "정렬 옵션")
-        @RequestParam(defaultValue = "RECENT") sortOption: SortOption
-    ): ResponseEntity<SuccessResponse<List<ChargeRequestDTO>>> {
+        @RequestParam(defaultValue = "RECENT") sortOption: SortOption,
+        @Parameter(description = "페이지 정보")
+        pageable: Pageable
+    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>> {
         val chargeRequests =
-            mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption)
+            mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption, pageable)
 
         val successResponse =
             SuccessResponse(200, "충전 요청 정보 조회에 성공하였습니다.", chargeRequests.map { ChargeRequestDTO.fromEntity(it) })
