@@ -4,6 +4,8 @@ import kea.dpang.mileage.base.BaseResponse
 import kea.dpang.mileage.base.SuccessResponse
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequestStatus
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import java.time.LocalDateTime
 
@@ -81,6 +83,7 @@ interface MileageController {
      * @param endDate 종료 날짜
      * @param depositorName 예금주 이름
      * @param sortOption 정렬 옵션
+     * @param pageable 페이지 정보
      * @return 조회된 충전 요청 목록을 포함하는 응답
      */
     fun getRechargeMileageRequests(
@@ -90,8 +93,9 @@ interface MileageController {
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         depositorName: String?,
-        sortOption: SortOption
-    ): ResponseEntity<SuccessResponse<List<ChargeRequestDTO>>>
+        sortOption: SortOption,
+        pageable: Pageable
+    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>>
 
     /**
      * 마일리지 충전 요청을 처리합니다.

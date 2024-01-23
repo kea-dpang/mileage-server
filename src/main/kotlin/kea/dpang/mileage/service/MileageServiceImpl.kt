@@ -3,7 +3,6 @@ package kea.dpang.mileage.service
 import com.querydsl.core.BooleanBuilder
 import jakarta.transaction.Transactional
 import kea.dpang.mileage.dto.*
-import kea.dpang.mileage.dto.SortOption.*
 import kea.dpang.mileage.entity.ChargeRequest
 import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.entity.ChargeRequestStatus.APPROVED
@@ -17,7 +16,8 @@ import kea.dpang.mileage.exception.UserMileageNotFoundException
 import kea.dpang.mileage.repository.ChargeRequestRepository
 import kea.dpang.mileage.repository.MileageRepository
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -132,8 +132,9 @@ class MileageServiceImpl(
         startDate: LocalDateTime?,
         endDate: LocalDateTime?,
         depositorName: String?,
-        sortOption: SortOption
-    ): List<ChargeRequest> {
+        sortOption: SortOption,
+        pageable: Pageable
+    ): Page<ChargeRequest> {
 
         val qChargeRequest = QChargeRequest.chargeRequest
         val builder = BooleanBuilder()
@@ -160,23 +161,7 @@ class MileageServiceImpl(
         }
 
         // 정렬 옵션에 따라 결과를 정렬하여 반환한다.
-        return when (sortOption) {
-            RECENT -> {
-                chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.DESC, "requestDate")).toList()
-            }
-
-            OLDEST -> {
-                chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.ASC, "requestDate")).toList()
-            }
-
-            MILEAGE_ASC -> {
-                chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.ASC, "requestedMileage")).toList()
-            }
-
-            MILEAGE_DESC -> {
-                chargeRequestRepository.findAll(builder, Sort.by(Sort.Direction.DESC, "requestedMileage")).toList()
-            }
-        }
+        return chargeRequestRepository.findAll(builder, pageable)
     }
 
     override fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): ChargeRequest {

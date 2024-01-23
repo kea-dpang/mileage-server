@@ -1,12 +1,15 @@
 package kea.dpang.mileage.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import kea.dpang.mileage.base.BaseResponse
 import kea.dpang.mileage.base.SuccessResponse
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.service.MileageService
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -22,8 +25,10 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 생성", description = "마일리지를 생성합니다. 이 API는 회원 가입 시 호출됩니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun createMileage(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
-        userId: Long
+        @Parameter(description = "마일리지를 생성할 사용자 ID")
+        @RequestParam userId: Long
     ): ResponseEntity<SuccessResponse<MileageDTO>> {
 
         val mileage = mileageService.createMileage(userId)
@@ -35,7 +40,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 조회", description = "사용자의 마일리지를 조회합니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun getMileage(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "마일리지 조회할 사용자 ID")
         @PathVariable userId: Long
     ): ResponseEntity<SuccessResponse<MileageDTO>> {
 
@@ -48,7 +55,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 삭제", description = "사용자의 마일리지를 삭제합니다. 이 API는 회원 탈퇴 시 호출됩니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun deleteMileage(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "마일리지 삭제할 사용자 ID")
         @PathVariable userId: Long
     ): ResponseEntity<BaseResponse> {
 
@@ -61,7 +70,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 사용", description = "마일리지를 사용합니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #request.userId)")
     override fun consumeMileage(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "마일리지 사용 요청 정보")
         @RequestBody request: ConsumeMileageRequestDTO
     ): ResponseEntity<BaseResponse> {
 
@@ -74,7 +85,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 환불", description = "마일리지를 환불합니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #request.userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun refundMileage(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "마일리지 환불 요청 정보")
         @RequestBody request: RefundRequestDTO
     ): ResponseEntity<BaseResponse> {
 
@@ -87,7 +100,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 충전 요청", description = "마일리지 충전을 요청합니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #request.userId)")
     override fun requestMileageRecharge(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "마일리지 충전 요청 정보")
         @RequestBody request: MileageRechargeRequestDTO
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
 
@@ -101,16 +116,25 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 충전 요청 목록 조회", description = "마일리지 충전 요청 목록을 조회합니다.")
     @PreAuthorize("(hasRole('USER') and #clientId == #userId) or hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun getRechargeMileageRequests(
+        @Parameter(hidden = true)
         @RequestHeader("X-DPANG-CLIENT-ID") clientId: Long,
+        @Parameter(description = "사용자 ID")
         @RequestParam(required = false) userId: Long?,
+        @Parameter(description = "충전 요청 상태", required = false)
         @RequestParam(required = false) status: ChargeRequestStatus?,
+        @Parameter(description = "조회 시작 일시")
         @RequestParam(required = false) startDate: LocalDateTime?,
+        @Parameter(description = "조회 종료 일시")
         @RequestParam(required = false) endDate: LocalDateTime?,
+        @Parameter(description = "입금자 이름")
         @RequestParam(required = false) depositorName: String?,
-        @RequestParam(defaultValue = "RECENT") sortOption: SortOption
-    ): ResponseEntity<SuccessResponse<List<ChargeRequestDTO>>> {
+        @Parameter(description = "정렬 옵션")
+        @RequestParam(defaultValue = "RECENT") sortOption: SortOption,
+        @Parameter(description = "페이지 정보")
+        pageable: Pageable
+    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>> {
         val chargeRequests =
-            mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption)
+            mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption, pageable)
 
         val successResponse =
             SuccessResponse(200, "충전 요청 정보 조회에 성공하였습니다.", chargeRequests.map { ChargeRequestDTO.fromEntity(it) })
@@ -121,7 +145,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "마일리지 충전 요청 처리", description = "마일리지 충전 요청을 처리합니다.")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun processMileageRechargeRequest(
+        @Parameter(description = "처리할 마일리지 충전 요청 ID")
         @PathVariable id: Long,
+        @Parameter(description = "마일리지 충전 요청 처리 정보")
         @RequestBody request: MileageRechargeApprovalDTO
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
         val chargeRequest = mileageService.processMileageRechargeRequest(id, request)
