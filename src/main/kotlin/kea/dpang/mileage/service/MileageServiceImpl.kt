@@ -1,6 +1,5 @@
 package kea.dpang.mileage.service
 
-import jakarta.transaction.Transactional
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequest
 import kea.dpang.mileage.entity.ChargeRequestStatus
@@ -17,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.Period
@@ -49,6 +49,7 @@ class MileageServiceImpl(
         return mileageRepository.save(newMileage)
     }
 
+    @Transactional(readOnly = true)
     override fun getMileage(userId: Long): Mileage {
         return mileageRepository.findById(userId).orElseThrow {
             UserMileageNotFoundException(userId)
@@ -124,6 +125,7 @@ class MileageServiceImpl(
         return chargeRequestRepository.save(chargeRequest)
     }
 
+    @Transactional(readOnly = true)
     override fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
