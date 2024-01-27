@@ -141,16 +141,16 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         return ResponseEntity(successResponse, HttpStatus.OK)
     }
 
-    @PostMapping("/recharge-requests/{id}/process")
+    @PostMapping("/recharge-requests/{requestId}/process")
     @Operation(summary = "마일리지 충전 요청 처리", description = "마일리지 충전 요청을 처리합니다.")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun processMileageRechargeRequest(
         @Parameter(description = "처리할 마일리지 충전 요청 ID")
-        @PathVariable id: Long,
+        @PathVariable requestId: Long,
         @Parameter(description = "마일리지 충전 요청 처리 정보")
         @RequestBody request: MileageRechargeApprovalDTO
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
-        val chargeRequest = mileageService.processMileageRechargeRequest(id, request)
+        val chargeRequest = mileageService.processMileageRechargeRequest(requestId, request)
         val successResponse =
             SuccessResponse(200, "마일리지 충전 요청 처리에 성공하였습니다.", ChargeRequestDTO.fromEntity(chargeRequest))
         return ResponseEntity(successResponse, HttpStatus.OK)

@@ -100,12 +100,12 @@ interface MileageController {
     /**
      * 마일리지 충전 요청을 처리합니다.
      *
-     * @param id 처리할 마일리지 충전 요청의 ID.
+     * @param requestId 처리할 마일리지 충전 요청의 ID.
      * @param request 마일리지 충전 요청의 승인 정보를 담은 DTO.
      * @return 처리된 마일리지 충전 요청 정보.
      */
     fun processMileageRechargeRequest(
-        id: Long,
+        requestId: Long,
         request: MileageRechargeApprovalDTO
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>>
 
