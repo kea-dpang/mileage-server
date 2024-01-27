@@ -1,6 +1,5 @@
 package kea.dpang.mileage.service
 
-import com.querydsl.core.BooleanBuilder
 import jakarta.transaction.Transactional
 import kea.dpang.mileage.dto.*
 import kea.dpang.mileage.entity.ChargeRequest
@@ -8,7 +7,6 @@ import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.entity.ChargeRequestStatus.APPROVED
 import kea.dpang.mileage.entity.ChargeRequestStatus.REJECTED
 import kea.dpang.mileage.entity.Mileage
-import kea.dpang.mileage.entity.QChargeRequest
 import kea.dpang.mileage.exception.ChargeRequestNotFoundException
 import kea.dpang.mileage.exception.InsufficientMileageException
 import kea.dpang.mileage.exception.UserMileageAlreadyExistsException
@@ -136,32 +134,15 @@ class MileageServiceImpl(
         pageable: Pageable
     ): Page<ChargeRequest> {
 
-        val qChargeRequest = QChargeRequest.chargeRequest
-        val builder = BooleanBuilder()
-
-        // 검색 조건을 추가한다.
-        if (userId != null) {
-            builder.and(qChargeRequest.userId.eq(userId))
-        }
-        if (status != null) {
-            builder.and(qChargeRequest.status.eq(status))
-        }
-        if (startDate != null && endDate != null) {
-            builder.and(qChargeRequest.requestDate.between(startDate, endDate))
-        } else {
-            if (startDate != null) {
-                builder.and(qChargeRequest.requestDate.after(startDate))
-            }
-            if (endDate != null) {
-                builder.and(qChargeRequest.requestDate.before(endDate))
-            }
-        }
-        if (depositorName != null) {
-            builder.and(qChargeRequest.depositorName.eq(depositorName))
-        }
-
-        // 정렬 옵션에 따라 결과를 정렬하여 반환한다.
-        return chargeRequestRepository.findAll(builder, pageable)
+        return chargeRequestRepository.getRechargeMileageRequests(
+            userId = userId,
+            status = status,
+            startDate = startDate,
+            endDate = endDate,
+            depositorName = depositorName,
+            sortOption = sortOption,
+            pageable = pageable
+        )
     }
 
     override fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): ChargeRequest {
