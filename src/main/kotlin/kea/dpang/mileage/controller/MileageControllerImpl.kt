@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("/mileage")
+@RequestMapping("/api/mileage")
 @Tag(name = "Mileage", description = "마일리지 관련 API를 제공합니다.")
 class MileageControllerImpl(private val mileageService: MileageService) : MileageController {
 
@@ -133,6 +133,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         @Parameter(description = "페이지 정보")
         pageable: Pageable
     ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>> {
+
         val chargeRequests =
             mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption, pageable)
 
@@ -141,16 +142,17 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         return ResponseEntity(successResponse, HttpStatus.OK)
     }
 
-    @PostMapping("/recharge-requests/{id}/process")
+    @PostMapping("/recharge-requests/{requestId}/process")
     @Operation(summary = "마일리지 충전 요청 처리", description = "마일리지 충전 요청을 처리합니다.")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun processMileageRechargeRequest(
         @Parameter(description = "처리할 마일리지 충전 요청 ID")
-        @PathVariable id: Long,
+        @PathVariable requestId: Long,
         @Parameter(description = "마일리지 충전 요청 처리 정보")
         @RequestBody request: MileageRechargeApprovalDTO
     ): ResponseEntity<SuccessResponse<ChargeRequestDTO>> {
-        val chargeRequest = mileageService.processMileageRechargeRequest(id, request)
+
+        val chargeRequest = mileageService.processMileageRechargeRequest(requestId, request)
         val successResponse =
             SuccessResponse(200, "마일리지 충전 요청 처리에 성공하였습니다.", ChargeRequestDTO.fromEntity(chargeRequest))
         return ResponseEntity(successResponse, HttpStatus.OK)
@@ -160,6 +162,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "연간 마일리지 충전", description = "연간 마일리지를 충전합니다.")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun chargeAnnualMileage(): ResponseEntity<BaseResponse> {
+
         mileageService.chargeAnnualMileage()
         val response = BaseResponse(200, "연간 마일리지 충전이 성공적으로 처리되었습니다.")
         return ResponseEntity(response, HttpStatus.OK)
@@ -169,6 +172,7 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
     @Operation(summary = "분기별 근속년수에 따른 마일리지 충전", description = "분기별 근속년수에 따른 마일리지를 충전합니다.")
     @PreAuthorize("hasRole('ADMIN') or hasRole('SUPER_ADMIN')")
     override fun chargeQuarterlyMileageBasedOnTenure(): ResponseEntity<BaseResponse> {
+
         mileageService.chargeQuarterlyMileageBasedOnTenure()
         val response = BaseResponse(200, "분기별 근속년수 기반 마일리지 충전이 성공적으로 처리되었습니다.")
         return ResponseEntity(response, HttpStatus.OK)

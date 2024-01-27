@@ -72,7 +72,7 @@ class MileageServiceImplIntegrationTest {
         // 마일리지 충전 요청을 승인합니다.
         val approvalDTO = MileageRechargeApprovalDTO(true)
         val approvedMileage =
-            mileageService.processMileageRechargeRequest(requestedMileage.chargeRequestId!!, approvalDTO)
+            mileageService.processMileageRechargeRequest(requestedMileage.id!!, approvalDTO)
         assertEquals(ChargeRequestStatus.APPROVED, approvedMileage.status)
 
         // 사용자의 마일리지가 올바르게 증가했는지 확인합니다.
@@ -103,7 +103,7 @@ class MileageServiceImplIntegrationTest {
         // 마일리지 충전 요청을 거부합니다.
         val rejectionDTO = MileageRechargeApprovalDTO(false)
         val rejectedMileage =
-            mileageService.processMileageRechargeRequest(requestedMileage.chargeRequestId!!, rejectionDTO)
+            mileageService.processMileageRechargeRequest(requestedMileage.id!!, rejectionDTO)
         assertEquals(ChargeRequestStatus.REJECTED, rejectedMileage.status)
     }
 
@@ -120,12 +120,12 @@ class MileageServiceImplIntegrationTest {
 
         // 마일리지 충전 요청을 승인합니다.
         val approvalDTO = MileageRechargeApprovalDTO(true)
-        requestedMileage = mileageService.processMileageRechargeRequest(requestedMileage.chargeRequestId!!, approvalDTO)
+        requestedMileage = mileageService.processMileageRechargeRequest(requestedMileage.id!!, approvalDTO)
         assertEquals(ChargeRequestStatus.APPROVED, requestedMileage.status)
 
         // 이미 승인된 충전 요청에 대해 다시 승인을 시도합니다.
         val repeatedApprovalMileage =
-            mileageService.processMileageRechargeRequest(requestedMileage.chargeRequestId!!, approvalDTO)
+            mileageService.processMileageRechargeRequest(requestedMileage.id!!, approvalDTO)
         assertEquals(ChargeRequestStatus.APPROVED, repeatedApprovalMileage.status)
 
         // 사용자의 마일리지가 올바르게 증가했는지 확인합니다.

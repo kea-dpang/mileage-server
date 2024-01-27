@@ -2,7 +2,7 @@ package kea.dpang.mileage.repository
 
 import kea.dpang.mileage.entity.ChargeRequest
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.querydsl.QuerydslPredicateExecutor
+import org.springframework.stereotype.Repository
 
-interface ChargeRequestRepository : JpaRepository<ChargeRequest, Long>, QuerydslPredicateExecutor<ChargeRequest> {
-}
+@Repository
+interface ChargeRequestRepository : JpaRepository<ChargeRequest, Long>, ChargeRequestRepositoryCustom
