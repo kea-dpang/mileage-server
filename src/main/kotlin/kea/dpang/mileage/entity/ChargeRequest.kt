@@ -33,5 +33,5 @@ data class ChargeRequest(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "charge_request_id")
-    var chargeRequestId: Long? = null
+    var id: Long? = null
 )

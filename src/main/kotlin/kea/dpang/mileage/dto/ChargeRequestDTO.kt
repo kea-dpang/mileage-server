@@ -20,7 +20,7 @@ data class ChargeRequestDTO(
                 requestDate = chargeRequest.requestDate,
                 depositorName = chargeRequest.depositorName,
                 requestedMileage = chargeRequest.requestedMileage,
-                chargeRequestId = chargeRequest.chargeRequestId!!
+                chargeRequestId = chargeRequest.id!!
             )
         }
     }
