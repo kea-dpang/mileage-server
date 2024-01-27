@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
 
 @RestController
-@RequestMapping("/mileage")
+@RequestMapping("/api/mileage")
 @Tag(name = "Mileage", description = "마일리지 관련 API를 제공합니다.")
 class MileageControllerImpl(private val mileageService: MileageService) : MileageController {
 
