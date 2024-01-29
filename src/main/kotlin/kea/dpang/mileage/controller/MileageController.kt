@@ -7,7 +7,7 @@ import kea.dpang.mileage.entity.ChargeRequestStatus
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 /**
  * 마일리지 관련 작업을 처리하는 컨트롤러 인터페이스.
@@ -90,8 +90,8 @@ interface MileageController {
         clientId: Long,
         userId: Long?,
         status: ChargeRequestStatus?,
-        startDate: LocalDateTime?,
-        endDate: LocalDateTime?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
         depositorName: String?,
         sortOption: SortOption,
         pageable: Pageable

@@ -6,7 +6,7 @@ import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.entity.Mileage
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 /**
  * 마일리지 서비스 인터페이스.
@@ -73,8 +73,8 @@ interface MileageService {
     fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
-        startDate: LocalDateTime?,
-        endDate: LocalDateTime?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
         depositorName: String?,
         sortOption: SortOption = SortOption.RECENT,
         pageable: Pageable

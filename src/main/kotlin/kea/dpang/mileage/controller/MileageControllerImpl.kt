@@ -14,7 +14,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/mileage")
@@ -123,9 +123,9 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         @Parameter(description = "충전 요청 상태", required = false)
         @RequestParam(required = false) status: ChargeRequestStatus?,
         @Parameter(description = "조회 시작 일시")
-        @RequestParam(required = false) startDate: LocalDateTime?,
+        @RequestParam(required = false) startDate: LocalDate?,
         @Parameter(description = "조회 종료 일시")
-        @RequestParam(required = false) endDate: LocalDateTime?,
+        @RequestParam(required = false) endDate: LocalDate?,
         @Parameter(description = "입금자 이름")
         @RequestParam(required = false) depositorName: String?,
         @Parameter(description = "정렬 옵션")
