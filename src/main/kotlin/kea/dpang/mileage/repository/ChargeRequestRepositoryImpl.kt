@@ -11,7 +11,7 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 
 /**
@@ -37,8 +37,8 @@ class ChargeRequestRepositoryImpl(
     override fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
-        startDate: LocalDateTime?,
-        endDate: LocalDateTime?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
         depositorName: String?,
         sortOption: SortOption,
         pageable: Pageable
@@ -55,13 +55,13 @@ class ChargeRequestRepositoryImpl(
             builder.and(qChargeRequest.status.eq(status))
         }
         if (startDate != null && endDate != null) {
-            builder.and(qChargeRequest.requestDate.between(startDate, endDate))
+            builder.and(qChargeRequest.requestDate.between(startDate.atStartOfDay(), endDate.plusDays(1).atStartOfDay()))
         } else {
             if (startDate != null) {
-                builder.and(qChargeRequest.requestDate.after(startDate))
+                builder.and(qChargeRequest.requestDate.after(startDate.atStartOfDay()))
             }
             if (endDate != null) {
-                builder.and(qChargeRequest.requestDate.before(endDate))
+                builder.and(qChargeRequest.requestDate.before(endDate.plusDays(1).atStartOfDay()))
             }
         }
         if (depositorName != null) {

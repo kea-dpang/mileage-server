@@ -164,8 +164,8 @@ class MileageServiceImpl(
     override fun getRechargeMileageRequests(
         userId: Long?,
         status: ChargeRequestStatus?,
-        startDate: LocalDateTime?,
-        endDate: LocalDateTime?,
+        startDate: LocalDate?,
+        endDate: LocalDate?,
         depositorName: String?,
         sortOption: SortOption,
         pageable: Pageable
