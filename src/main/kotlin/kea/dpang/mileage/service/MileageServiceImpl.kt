@@ -183,7 +183,7 @@ class MileageServiceImpl(
 
         val chargeRequestDTOs = chargeRequests.map { chargeRequest ->
             logger.info("사용자 정보 조회, 사용자 ID: ${chargeRequest.userId}")
-            val userDto = userFeignClient.getUserInfo(chargeRequest.userId)
+            val userDto = userFeignClient.getUserInfo(chargeRequest.userId).body!!.data
 
             ChargeRequestDetailDTO(chargeRequest, userDto)
         }
