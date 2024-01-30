@@ -10,6 +10,7 @@ import kea.dpang.mileage.exception.ChargeRequestNotFoundException
 import kea.dpang.mileage.exception.InsufficientMileageException
 import kea.dpang.mileage.exception.UserMileageAlreadyExistsException
 import kea.dpang.mileage.exception.UserMileageNotFoundException
+import kea.dpang.mileage.feign.UserFeignClient
 import kea.dpang.mileage.repository.ChargeRequestRepository
 import kea.dpang.mileage.repository.MileageRepository
 import org.slf4j.LoggerFactory
@@ -28,7 +29,8 @@ import java.time.Period
 @Transactional
 class MileageServiceImpl(
     private val mileageRepository: MileageRepository,
-    private val chargeRequestRepository: ChargeRequestRepository
+    private val chargeRequestRepository: ChargeRequestRepository,
+    private val userFeignClient: UserFeignClient
 ) : MileageService {
 
     private val logger = LoggerFactory.getLogger(MileageServiceImpl::class.java)
@@ -169,10 +171,10 @@ class MileageServiceImpl(
         depositorName: String?,
         sortOption: SortOption,
         pageable: Pageable
-    ): Page<ChargeRequest> {
+    ): Page<ChargeRequestDetailDTO> {
         logger.info("마일리지 충전 요청 조회 시작, 사용자 ID: $userId, 상태: $status, 시작 날짜: $startDate, 종료 날짜: $endDate, 입금자 이름: $depositorName, 정렬 옵션: $sortOption")
 
-        val rechargeRequests = chargeRequestRepository.getRechargeMileageRequests(
+        val chargeRequests = chargeRequestRepository.getRechargeMileageRequests(
             userId = userId,
             status = status,
             startDate = startDate,
@@ -182,9 +184,16 @@ class MileageServiceImpl(
             pageable = pageable
         )
 
-        logger.info("마일리지 충전 요청 조회 완료, 총 조회 건수: ${rechargeRequests.totalElements}")
+        val chargeRequestDTOs = chargeRequests.map { chargeRequest ->
+            logger.info("사용자 정보 조회, 사용자 ID: ${chargeRequest.userId}")
+            val userDto = userFeignClient.getUserInfo(chargeRequest.userId)
 
-        return rechargeRequests
+            ChargeRequestDetailDTO(chargeRequest, userDto)
+        }
+
+        logger.info("마일리지 충전 요청 조회 완료, 총 조회 건수: ${chargeRequestDTOs.totalElements}")
+
+        return chargeRequestDTOs
     }
 
     override fun processMileageRechargeRequest(id: Long, request: MileageRechargeApprovalDTO): ChargeRequest {

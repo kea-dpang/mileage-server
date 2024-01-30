@@ -78,7 +78,7 @@ interface MileageService {
         depositorName: String?,
         sortOption: SortOption = SortOption.RECENT,
         pageable: Pageable
-    ): Page<ChargeRequest>
+    ): Page<ChargeRequestDetailDTO>
 
     /**
      * 마일리지 충전 요청을 처리합니다.
