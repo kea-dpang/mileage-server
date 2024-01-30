@@ -16,55 +16,30 @@ import java.time.LocalDateTime
 @ControllerAdvice
 class GlobalExceptionHandler : ResponseEntityExceptionHandler() {
 
-    @ExceptionHandler(ChargeRequestNotFoundException::class)
-    private fun handleChargeRequestNotFoundException(ex: ChargeRequestNotFoundException, request: WebRequest): ResponseEntity<ErrorResponse> {
-        val errorMessage = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.NOT_FOUND.value(),
-            error = HttpStatus.NOT_FOUND.name,
-            message = ex.message ?: "세부 정보가 제공되지 않았습니다",
-            path = request.getDescription(false)
-        )
-
-        return ResponseEntity(errorMessage, HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ChargeRequestNotFoundException::class, UserMileageNotFoundException::class)
+    private fun handleNotFoundException(ex: RuntimeException, request: WebRequest): ResponseEntity<ErrorResponse> {
+        return generateErrorResponse(HttpStatus.NOT_FOUND, ex, request)
     }
 
     @ExceptionHandler(InsufficientMileageException::class)
-    private fun handleInsufficientMileageException(ex: InsufficientMileageException, request: WebRequest): ResponseEntity<ErrorResponse> {
-        val errorMessage = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.BAD_REQUEST.value(),
-            error = HttpStatus.BAD_REQUEST.name,
-            message = ex.message ?: "세부 정보가 제공되지 않았습니다",
-            path = request.getDescription(false)
-        )
-
-        return ResponseEntity(errorMessage, HttpStatus.BAD_REQUEST)
+    private fun handleBadRequestException(ex: RuntimeException, request: WebRequest): ResponseEntity<ErrorResponse> {
+        return generateErrorResponse(HttpStatus.BAD_REQUEST, ex, request)
     }
 
     @ExceptionHandler(UserMileageAlreadyExistsException::class)
-    private fun handleUserMileageAlreadyExistsException(ex: UserMileageAlreadyExistsException, request: WebRequest): ResponseEntity<ErrorResponse> {
-        val errorMessage = ErrorResponse(
-            timestamp = LocalDateTime.now(),
-            status = HttpStatus.CONFLICT.value(),
-            error = HttpStatus.CONFLICT.name,
-            message = ex.message ?: "세부 정보가 제공되지 않았습니다",
-            path = request.getDescription(false)
-        )
-
-        return ResponseEntity(errorMessage, HttpStatus.CONFLICT)
+    private fun handleConflictException(ex: RuntimeException, request: WebRequest): ResponseEntity<ErrorResponse> {
+        return generateErrorResponse(HttpStatus.CONFLICT, ex, request)
     }
 
-    @ExceptionHandler(UserMileageNotFoundException::class)
-    private fun handleUserMileageNotFoundException(ex: UserMileageNotFoundException, request: WebRequest): ResponseEntity<ErrorResponse> {
+    private fun generateErrorResponse(status: HttpStatus, ex: RuntimeException, request: WebRequest): ResponseEntity<ErrorResponse> {
         val errorMessage = ErrorResponse(
             timestamp = LocalDateTime.now(),
-            status = HttpStatus.NOT_FOUND.value(),
-            error = HttpStatus.NOT_FOUND.name,
+            status = status.value(),
+            error = status.name,
             message = ex.message ?: "세부 정보가 제공되지 않았습니다",
             path = request.getDescription(false)
         )
 
-        return ResponseEntity(errorMessage, HttpStatus.NOT_FOUND)
+        return ResponseEntity(errorMessage, status)
     }
 }
