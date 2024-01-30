@@ -6,10 +6,7 @@ import kea.dpang.mileage.entity.ChargeRequestStatus
 import kea.dpang.mileage.entity.ChargeRequestStatus.APPROVED
 import kea.dpang.mileage.entity.ChargeRequestStatus.REJECTED
 import kea.dpang.mileage.entity.Mileage
-import kea.dpang.mileage.exception.ChargeRequestNotFoundException
-import kea.dpang.mileage.exception.InsufficientMileageException
-import kea.dpang.mileage.exception.UserMileageAlreadyExistsException
-import kea.dpang.mileage.exception.UserMileageNotFoundException
+import kea.dpang.mileage.exception.*
 import kea.dpang.mileage.feign.UserFeignClient
 import kea.dpang.mileage.repository.ChargeRequestRepository
 import kea.dpang.mileage.repository.MileageRepository
@@ -225,9 +222,9 @@ class MileageServiceImpl(
                     mileage.personalChargedMileage += requestedMileage
                     chargeRequest.status = APPROVED
                     logger.info("마일리지 충전 요청 승인, 총 충전량: $requestedMileage")
-                }
-                // 요청이 거절인 경우 상태만 거절로 변경하고 마일리지는 변동이 없음
-                else {
+
+                } else {
+                    // 요청이 거절인 경우 상태만 거절로 변경하고 마일리지는 변동이 없음
                     chargeRequest.status = REJECTED
                     logger.info("마일리지 충전 요청 거절")
                 }
@@ -239,8 +236,10 @@ class MileageServiceImpl(
                     mileage.personalChargedMileage -= requestedMileage
                     chargeRequest.status = REJECTED
                     logger.info("마일리지 충전 요청 승인 취소, 총 감소량: $requestedMileage")
+
+                } else {
+                    throw AlreadyApprovedException(chargeRequest.id!!)
                 }
-                // 승인 요청인 경우 상태와 마일리지는 변동 없음
             }
 
             REJECTED -> {
@@ -249,8 +248,10 @@ class MileageServiceImpl(
                     mileage.personalChargedMileage += requestedMileage
                     chargeRequest.status = APPROVED
                     logger.info("마일리지 충전 요청 거절 해제, 총 충전량: $requestedMileage")
+
+                } else {
+                    throw AlreadyRejectedException(chargeRequest.id!!)
                 }
-                // 거절 요청인 경우 상태와 마일리지는 변동 없음
             }
         }
 
