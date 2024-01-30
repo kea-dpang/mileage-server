@@ -95,7 +95,7 @@ interface MileageController {
         depositorName: String?,
         sortOption: SortOption,
         pageable: Pageable
-    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>>
+    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDetailDTO>>>
 
     /**
      * 마일리지 충전 요청을 처리합니다.

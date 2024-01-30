@@ -135,13 +135,13 @@ class MileageControllerImpl(private val mileageService: MileageService) : Mileag
         @RequestParam(defaultValue = "RECENT") sortOption: SortOption,
         @Parameter(description = "페이지 정보")
         pageable: Pageable
-    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDTO>>> {
+    ): ResponseEntity<SuccessResponse<Page<ChargeRequestDetailDTO>>> {
 
         val chargeRequests =
             mileageService.getRechargeMileageRequests(userId, status, startDate, endDate, depositorName, sortOption, pageable)
 
         val successResponse =
-            SuccessResponse(200, "충전 요청 정보 조회에 성공하였습니다.", chargeRequests.map { ChargeRequestDTO.fromEntity(it) })
+            SuccessResponse(200, "충전 요청 정보 조회에 성공하였습니다.", chargeRequests)
         return ResponseEntity(successResponse, HttpStatus.OK)
     }
 
