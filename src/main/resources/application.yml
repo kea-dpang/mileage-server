@@ -11,3 +11,4 @@ spring:
 logging:
   level:
     org.springframework.security: DEBUG
+    kea.dpang.upload.feign.*: DEBUG
