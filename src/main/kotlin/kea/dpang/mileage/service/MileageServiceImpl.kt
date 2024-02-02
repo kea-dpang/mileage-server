@@ -181,11 +181,21 @@ class MileageServiceImpl(
             pageable = pageable
         )
 
-        val chargeRequestDTOs = chargeRequests.map { chargeRequest ->
-            logger.info("사용자 정보 조회, 사용자 ID: ${chargeRequest.userId}")
-            val userDto = userFeignClient.getUserInfo(chargeRequest.userId).body!!.data
+        // 사용자 ID를 추출한다.
+        val userIds = chargeRequests.content.map { it.userId }
 
-            ChargeRequestDetailDTO(chargeRequest, userDto)
+        // 사용자 정보를 일괄 조회한다.
+        logger.info("사용자 정보 일괄 조회, 사용자 ID: $userIds")
+        val userDtoList = userFeignClient.getUsersInfo(userIds).body!!.data
+
+        // 사용자 ID를 key로 하는 Map을 생성한다.
+        val userDtoMap = userDtoList.associateBy { it.userId }
+
+        // DTO 변환 시 사용자 정보를 Map에서 가져온다.
+        val chargeRequestDTOs = chargeRequests.map { chargeRequest ->
+            userDtoMap[chargeRequest.userId]?.let { userDto ->
+                ChargeRequestDetailDTO(chargeRequest, userDto)
+            }
         }
 
         logger.info("마일리지 충전 요청 조회 완료, 총 조회 건수: ${chargeRequestDTOs.totalElements}")
