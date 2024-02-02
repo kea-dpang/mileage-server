@@ -51,10 +51,10 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+          fields: repo,action,ref,job,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        if: always()
+        if: failure()
 
   update-k8s:
     needs: build-docker-image
@@ -89,6 +89,28 @@ jobs:
         with:
           status: ${{ job.status }}
           fields: repo,message,commit,author,action,eventName,ref,workflow,job,took,pullRequest
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
+
+      - name: slack-notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,action,ref,job,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: failure()
+
+  slack-notification:
+    needs: [build-docker-image, update-k8s]
+    runs-on: ubuntu-latest
+    steps:
+      - name: slack-notification
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,action,ref,job,took
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         if: always()
