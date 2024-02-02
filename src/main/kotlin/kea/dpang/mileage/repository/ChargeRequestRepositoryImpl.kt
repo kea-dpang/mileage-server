@@ -77,7 +77,15 @@ class ChargeRequestRepositoryImpl(
             .orderBy(getSortOption(sortOption))
             .fetch()
 
-        return PageImpl(chargeRequests, pageable, chargeRequests.size.toLong())
+        // 전체 충전 요청 수를 가져온다.
+        val totalChargeRequests = jpaQueryFactory
+            .selectFrom(qChargeRequest)
+            .where(builder)
+            .fetch()
+            .size
+            .toLong()
+
+        return PageImpl(chargeRequests, pageable, totalChargeRequests)
     }
 
     /**
