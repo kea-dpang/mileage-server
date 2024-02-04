@@ -184,6 +184,12 @@ class MileageServiceImpl(
         // 사용자 ID를 추출한다.
         val userIds = chargeRequests.content.map { it.userId }
 
+        // 사용자 ID가 없는 경우, 빈 페이지를 반환한다.
+        if (userIds.isEmpty()) {
+            logger.info("마일리지 충전 요청 조회 완료, 총 조회 건수: 0")
+            return Page.empty(pageable)
+        }
+
         // 사용자 정보를 일괄 조회한다.
         logger.info("사용자 정보 일괄 조회, 사용자 ID: $userIds")
         val userDtoList = userFeignClient.getUsersInfo(userIds).body!!.data
