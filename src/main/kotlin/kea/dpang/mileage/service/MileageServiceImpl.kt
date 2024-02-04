@@ -71,7 +71,13 @@ class MileageServiceImpl(
         logger.info("마일리지 삭제 요청 시작, 사용자 ID: $userId")
 
         if (mileageRepository.existsById(userId)) {
+            val chargeRequests = chargeRequestRepository.findByUserId(userId)
+            chargeRequestRepository.deleteAll(chargeRequests)
+            logger.info("사용자(${userId})의 마일리지 충전 요청 삭제 완료")
+
             mileageRepository.deleteById(userId)
+            logger.info("사용자(${userId})의 마일리지 삭제 완료")
+
             logger.info("마일리지 삭제 요청 완료, 삭제된 사용자 ID: $userId")
 
         } else {
