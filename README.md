@@ -8,62 +8,42 @@
 
 ## 🔀 프로젝트 아키텍처
 
-아래의 Sequence Diagram은 본 프로젝트의 주요 컴포넌트인 Spring Cloud Gateway, 타 서비스, 그리고 마일리지 서비스 간의 상호작용을 보여줍니다.
-
 ```mermaid
 sequenceDiagram
     participant Client as Client
     participant Gateway as Spring Cloud Gateway
-    participant OtherService as Other Service
     participant MileageService as Mileage Service
     participant MySQL as MySQL
-    Client ->> Gateway: 요청 전송 (JWT 토큰 포함)
-    Gateway ->> Gateway: 요청 인증 및 인가
+    participant OtherService as Other Service
+    
+    Client ->> Gateway: 요청 전송
+    Gateway ->> MileageService: 요청 전달 <br> (X-DPANG-CLIENT-ID, X-DPANG-CLIENT-ROLE 헤더 추가)
+    MileageService ->> MileageService: 해당 요청 권한 식별
 
-    alt 인증 성공
-        alt 요청이 Other Service에서 Mileage Service에 API 요청하는 경우
-            Gateway ->> OtherService: 요청 전달 (X-DPANG-CLIENT-ID 헤더 추가)
-            OtherService ->> MileageService: API 요청
-        else 요청이 직접 Mileage Service를 호출하는 경우
-            Gateway ->> MileageService: 요청 전달 (X-DPANG-CLIENT-ID 헤더 추가)
-        end
-        MileageService ->> MileageService: 해당 요청 권한 식별
+    opt 요청에 대한 권한이 있는 경우
+        MileageService ->> MySQL: 데이터 요청
+        MySQL -->> MileageService: 데이터 응답
 
-        alt 요청이 역할에 적합
-            MileageService ->> MySQL: 데이터 요청
-            MySQL -->> MileageService: 데이터 응답
-            MileageService ->> MileageService: 응답 처리
-
-            alt 요청이 Other Service에서 Mileage Service에 API 요청하는 경우
-                MileageService -->> OtherService: 응답 전송
-                OtherService -->> Gateway: 응답 전송
-            else 요청이 직접 Mileage Service를 호출하는 경우
-                MileageService -->> Gateway: 응답 전송
-            end
-
-            Gateway -->> Client: 최종 응답 전달
-
-        else 요청이 역할에 부적합
-            alt 요청이 Other Service에서 Mileage Service에 API 요청하는 경우
-                MileageService -->> OtherService: 사용자 권한 없음 응답
-                OtherService -->> Gateway: 사용자 권한 없음 응답
-            else 요청이 직접 Mileage Service를 호출하는 경우
-                MileageService -->> Gateway: 사용자 권한 없음 응답
-            end
-            Gateway -->> Client: 사용자 권한 없음 응답
+        opt 타 서비스의 데이터가 필요한 경우
+            MileageService ->> OtherService: API 요청 <br> (X-DPANG-SERVICE-NAME 헤더 추가)
+            OtherService ->> OtherService: 요청에 대한 처리
+            OtherService -->> MileageService: 처리된 API 응답
         end
 
-    else 인증 실패
-        Gateway -->> Client: 인증 실패 응답
+        MileageService ->> MileageService: 응답 처리
+        MileageService -->> Gateway: 응답 전송
+        Gateway -->> Client: 최종 응답 전달
     end
 
+    opt 요청에 대한 권한이 없는 경우
+        MileageService -->> Gateway: 사용자 권한 없음 응답
+        Gateway -->> Client: 사용자 권한 없음 응답
+    end
+
+    opt 인증 실패한 경우
+        Gateway -->> Client: 인증 실패 응답
+    end
 ```
-
-시퀀스 다이어그램을 통해 확인할 수 있듯이, 클라이언트로부터의 요청은 초기 단계에서 Spring Cloud Gateway를 통과하게 됩니다. 이 과정에서 사용자 인증이 이루어지며, 이 인증이 성공적으로 완료되어야만
-서비스 요청이 이어집니다.
-
-인증 과정이 정상적으로 마무리되면, 'X-DPANG-CLIENT-ID'라는 사용자 정의 헤더에 사용자의 ID 정보가 포함되어 전달됩니다. 이 헤더는 Mileage 서비스로의 요청에 함께 첨부되어, Mileage
-서비스가 요청을 한 사용자를 정확하게 파악할 수 있게 도와줍니다. 이렇게 사용자 식별에 성공한 요청은 적절한 처리 과정을 거친 후, 최종 결과가 반환됩니다.
 
 ## 🗃️ 데이터베이스 구조
 
@@ -73,20 +53,22 @@ sequenceDiagram
 erDiagram
     USER ||--|| MILEAGE: "has"
     USER ||--|| CHARGE_REQUEST: "requests"
+    
     MILEAGE {
-        bigint user_id PK
-        date join_date
-        int mileage
-        int personal_charged_mileage
-        datetime(6) updated_at
+        bigint user_id PK "사용자 식별자"
+        date join_date "가입 일자"
+        int mileage "마일리지"
+        int personal_charged_mileage "개인 충전 마일리지"
+        datetime(6) updated_at "최근 수정 일자"
     }
+    
     CHARGE_REQUEST {
-        bigint charge_request_id PK
-        int requested_mileage
-        datetime(6) request_date
-        bigint user_id
-        varchar(255) depositor_name
-        enum status
+        bigint charge_request_id PK "충전 요청 번호"
+        int requested_mileage "요청 마일리지"
+        datetime(6) request_date "요청 일자"
+        bigint user_id "사용자 식별자"
+        varchar(255) depositor_name "입금자명"
+        enum status "충전 요청 상태"
     }
 
 ```
