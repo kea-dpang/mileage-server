@@ -42,7 +42,7 @@ class MileageServiceImpl(
 
         val newMileage = Mileage(
             userId = userId,
-            mileage = 0,
+            mileage = 1_000_000,
             personalChargedMileage = 0,
             joinDate = LocalDate.now() // 회원가입 호출 시 해당 메소드가 호출되므로, 현재 날짜를 저장한다.
         )
